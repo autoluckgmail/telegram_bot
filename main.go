@@ -20,8 +20,8 @@ func main() {
 	}
 
 	//b, err := bot.New(os.Getenv("EXAMPLE_TELEGRAM_BOT_TOKEN"), opts...)
-	//b, err := bot.New("7369039700:AAHH2Db4G2nDYI6RzsL5ttI1XWBpTJVuy58", opts...) // test pid bot
-	b, err := bot.New("7457971759:AAEYDs74IUlcFhaCeGFj7mm6ue8GU30JGU0", opts...) // luck bot
+	b, err := bot.New("7369039700:AAHH2Db4G2nDYI6RzsL5ttI1XWBpTJVuy58", opts...) // test pid bot
+	//b, err := bot.New("7457971759:AAEYDs74IUlcFhaCeGFj7mm6ue8GU30JGU0", opts...) // luck bot
 	if nil != err {
 		// panics for the sake of simplicity.
 		// you should handle this error properly in your code.
@@ -56,7 +56,7 @@ func helloHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	kb := &models.InlineKeyboardMarkup{
 		InlineKeyboard: [][]models.InlineKeyboardButton{
 			{
-				{Text: "Open Web App", CallbackData: "button_1", WebApp: &models.WebAppInfo{URL: "https://test-pid-tg.polyflow.tech/"}},
+				{Text: "Open Web App", WebApp: &models.WebAppInfo{URL: "https://test-pid-tg.polyflow.tech/"}},
 				{Text: "Join PID community", CallbackData: "button_2", URL: "https://t.me/pid_channel"},
 			},
 			{
