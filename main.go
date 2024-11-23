@@ -2,8 +2,14 @@ package main
 
 import (
 	"context"
+	"crypto/md5"
+	"encoding/hex"
+	"fmt"
 	"os"
 	"os/signal"
+	"sort"
+	"strconv"
+	"strings"
 
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
@@ -12,6 +18,27 @@ import (
 // Send any text message to the bot after the bot has been started
 
 func main() {
+	/*
+		req := &telegramLoginRequest{
+			OpenID:    "7067365366",
+			FirstName: "zhengyi",
+			UserName:  "zhengyi_C",
+			Timestamp: 1732336698078,
+			Signature: "5f9e25121d1eb3d2e505c6a357707d86",
+		}
+	*/
+	req := &telegramLoginRequest{
+		OpenID:    "123",
+		FirstName: "A",
+		UserName:  "ABC",
+		Timestamp: 1732284099,
+		Signature: "5f9e25121d1eb3d2e505c6a357707d86",
+	}
+
+	key := "n&KKRSub#4z@RsRc"
+	sign := generateSignature(req, key)
+	fmt.Println(sign)
+
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 
@@ -20,8 +47,8 @@ func main() {
 	}
 
 	//b, err := bot.New(os.Getenv("EXAMPLE_TELEGRAM_BOT_TOKEN"), opts...)
-	b, err := bot.New("7369039700:AAHH2Db4G2nDYI6RzsL5ttI1XWBpTJVuy58", opts...) // test pid bot
-	//b, err := bot.New("7457971759:AAEYDs74IUlcFhaCeGFj7mm6ue8GU30JGU0", opts...) // luck bot
+	//b, err := bot.New("7369039700:AAHH2Db4G2nDYI6RzsL5ttI1XWBpTJVuy58", opts...) // test pid bot
+	b, err := bot.New("7457971759:AAEYDs74IUlcFhaCeGFj7mm6ue8GU30JGU0", opts...) // luck bot
 	if nil != err {
 		// panics for the sake of simplicity.
 		// you should handle this error properly in your code.
@@ -31,6 +58,42 @@ func main() {
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/hello", bot.MatchTypeExact, helloHandler)
 
 	b.Start(ctx)
+}
+
+type telegramLoginRequest struct {
+	OpenID    string `json:"open_id" validate:"required"`
+	FirstName string `json:"first_name" validate:"required"`
+	UserName  string `json:"user_name" validate:"required"`
+	Timestamp int64  `json:"timestamp" validate:"required"`
+	Signature string `json:"signature" validate:"required"`
+}
+
+func generateSignature(req *telegramLoginRequest, secretKey string) string {
+	// Collect fields into a map
+	fieldMap := map[string]string{
+		"open_id":    req.OpenID,
+		"first_name": req.FirstName,
+		"user_name":  req.UserName,
+		"timestamp":  strconv.FormatInt(req.Timestamp, 10),
+	}
+
+	// Sort the keys alphabetically
+	keys := make([]string, 0, len(fieldMap))
+	for key := range fieldMap {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+
+	// Concatenate the fields in sorted order
+	var builder strings.Builder
+	for _, key := range keys {
+		builder.WriteString(fieldMap[key])
+	}
+	builder.WriteString(secretKey) // Append the secret key
+
+	// Compute the MD5 hash
+	hash := md5.Sum([]byte(builder.String()))
+	return hex.EncodeToString(hash[:])
 }
 
 func helloHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
